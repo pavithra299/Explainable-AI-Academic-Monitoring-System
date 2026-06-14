@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Prediction Results</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: white;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: rgba(255,255,255,0.08);
+            padding: 40px;
+            border-radius: 20px;
+            width: 80%;
+            max-width: 700px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(0,0,0,0.4);
+        }
+
+        h1 {
+            color: #38bdf8;
+            margin-bottom: 30px;
+        }
+
+        .result-box {
+            background: #111827;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            font-size: 22px;
+        }
+
+        .score {
+            font-size: 50px;
+            font-weight: bold;
+            color: #38bdf8;
+        }
+
+        .mentor {
+            margin-top: 25px;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+
+        .btn {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 12px 25px;
+            background: #38bdf8;
+            color: black;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            background: #0ea5e9;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>🧠 Explainable AI Prediction Results</h1>
+
+    <div class="result-box">
+        🎓 Predicted Exam Score
+
+        <div class="score">
+            {{ predicted_score }}
+        </div>
+    </div>
+
+    <div class="result-box">
+        ⚠️ Risk Level:
+        <strong>{{ risk_level }}</strong>
+    </div>
+
+    <div class="result-box mentor">
+        🤖 AI Mentor Suggestion:
+
+        <br><br>
+
+        {{ mentor_message }}
+    </div>
+    <div class="result-box mentor">
+
+        <h3>🧠 Why did the AI predict this score?</h3>
+
+        <ul style="text-align:left; margin-top:20px;">
+
+            {% for explanation in shap_explanations %}
+
+                <li>{{ explanation }}</li>
+
+            {% endfor %}
+
+        </ul>
+
+    </div>
+
+    <a href="/student-data-ai" class="btn">
+        Predict Again
+    </a>
+
+</div>
+
+</body>
+</html>

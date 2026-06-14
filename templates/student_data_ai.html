@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Academic Assessment</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2563eb;
+        }
+
+        h2 {
+            color: #1e40af;
+            margin-top: 30px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🧠 Explainable AI Academic Assessment</h1>
+
+<form action="/predict-ai" method="post">
+
+    <h2>📚 Academic Factors</h2>
+
+    <input type="number" name="Hours_Studied" placeholder="Hours Studied per Week" required>
+
+    <input type="number" name="Attendance" placeholder="Attendance (%)" required>
+
+    <input type="number" name="Previous_Scores" placeholder="Previous Scores (%)" required>
+
+    <input type="number" name="Tutoring_Sessions" placeholder="Tutoring Sessions per Week" required>
+
+
+    <h2>🏠 Family & Resource Factors</h2>
+
+    <select name="Parental_Involvement" required>
+        <option value="">Parental Involvement</option>
+        <option>Low</option>
+        <option>Medium</option>
+        <option>High</option>
+    </select>
+
+    <select name="Access_to_Resources" required>
+        <option value="">Access to Resources</option>
+        <option>Low</option>
+        <option>Medium</option>
+        <option>High</option>
+    </select>
+
+    <select name="Family_Income" required>
+        <option value="">Family Income</option>
+        <option>Low</option>
+        <option>Medium</option>
+        <option>High</option>
+    </select>
+
+    <select name="Parental_Education_Level" required>
+        <option value="">Parental Education</option>
+        <option>High School</option>
+        <option>College</option>
+        <option>Postgraduate</option>
+    </select>
+
+    <select name="Internet_Access" required>
+        <option value="">Internet Access</option>
+        <option>Yes</option>
+        <option>No</option>
+    </select>
+
+    <select name="Distance_from_Home" required>
+        <option value="">Distance from Home</option>
+        <option>Near</option>
+        <option>Moderate</option>
+        <option>Far</option>
+    </select>
+
+
+    <h2>🧠 Personal Factors</h2>
+
+    <select name="Motivation_Level" required>
+        <option value="">Motivation Level</option>
+        <option>Low</option>
+        <option>Medium</option>
+        <option>High</option>
+    </select>
+
+    <input type="number" name="Sleep_Hours" placeholder="Sleep Hours per Day" required>
+
+    <input type="number" name="Physical_Activity" placeholder="Physical Activity Hours per Week" required>
+
+    <select name="Learning_Disabilities" required>
+        <option value="">Learning Disabilities</option>
+        <option>Yes</option>
+        <option>No</option>
+    </select>
+
+    <select name="Gender" required>
+        <option value="">Gender</option>
+        <option>Male</option>
+        <option>Female</option>
+    </select>
+
+
+    <h2>🏫 School & Social Factors</h2>
+
+    <select name="Teacher_Quality" required>
+        <option value="">Teacher Quality</option>
+        <option>Low</option>
+        <option>Medium</option>
+        <option>High</option>
+    </select>
+
+    <select name="School_Type" required>
+        <option value="">School Type</option>
+        <option>Public</option>
+        <option>Private</option>
+    </select>
+
+    <select name="Peer_Influence" required>
+        <option value="">Peer Influence</option>
+        <option>Negative</option>
+        <option>Neutral</option>
+        <option>Positive</option>
+    </select>
+
+    <select name="Extracurricular_Activities" required>
+        <option value="">Extracurricular Activities</option>
+        <option>Yes</option>
+        <option>No</option>
+    </select>
+
+    <button type="submit">
+        🚀 Predict Academic Performance
+    </button>
+
+</form>
+
+</div>
+
+</body>
+</html>

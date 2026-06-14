@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Explainable AI Academic Monitoring System</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI',sans-serif;
+}
+
+body{
+    background:linear-gradient(
+    135deg,
+    #0f172a,
+    #1e293b,
+    #0f172a
+    );
+    min-height:100vh;
+    color:white;
+}
+
+.header{
+    padding:25px;
+    text-align:center;
+    background:rgba(255,255,255,0.05);
+    backdrop-filter:blur(10px);
+}
+
+.header h1{
+    color:#38bdf8;
+}
+
+.container{
+    width:90%;
+    margin:auto;
+    padding:30px;
+}
+
+.cards{
+    display:grid;
+    grid-template-columns:
+    repeat(auto-fit,minmax(250px,1fr));
+    gap:20px;
+}
+
+.card{
+    background:rgba(255,255,255,0.08);
+    border-radius:20px;
+    padding:25px;
+    backdrop-filter:blur(12px);
+    box-shadow:0 0 20px rgba(0,0,0,0.4);
+    transition:0.3s;
+}
+
+.card:hover{
+    transform:translateY(-8px);
+}
+
+.card h2{
+    color:#38bdf8;
+    margin-bottom:10px;
+}
+
+.big-number{
+    font-size:38px;
+    font-weight:bold;
+}
+
+.section{
+    margin-top:35px;
+    background:rgba(255,255,255,0.08);
+    padding:25px;
+    border-radius:20px;
+}
+
+.section h2{
+    color:#38bdf8;
+    margin-bottom:15px;
+}
+
+.ai-box{
+    background:#111827;
+    padding:15px;
+    border-radius:15px;
+    margin-top:10px;
+}
+
+input{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    border:none;
+    border-radius:10px;
+}
+
+button{
+    margin-top:15px;
+    padding:12px 25px;
+    border:none;
+    border-radius:10px;
+    background:#38bdf8;
+    color:black;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#0ea5e9;
+}
+
+.footer{
+    text-align:center;
+    padding:20px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <h1>🚀 Explainable AI Academic Monitoring System</h1>
+    <p>Predict • Explain • Improve</p>
+</div>
+
+<div class="container">
+
+    <div class="cards">
+
+        <div class="card">
+            <h2>Attendance</h2>
+            <div class="big-number">{{ attendance }}%</div>
+        </div>
+
+        <div class="card">
+            <h2>Current GPA</h2>
+            <div class="big-number">8.2</div>
+        </div>
+
+        <div class="card">
+            <h2>Predicted GPA</h2>
+            <div class="big-number">{{ predicted_gpa }}</div>
+        </div>
+
+        <div class="card">
+            <h2>Health Score</h2>
+            <div class="big-number">{{ health_score }}/100</div>
+        </div>
+
+    </div>
+
+    <div class="section">
+        <h2>🧠 Explainable AI Analysis</h2>
+
+        <div class="ai-box">
+            Attendance Contribution : +35%
+        </div>
+
+        <div class="ai-box">
+            Internal Marks Contribution : +30%
+        </div>
+
+        <div class="ai-box">
+            Assignment Contribution : +20%
+        </div>
+
+        <div class="ai-box">
+            Lab Performance Contribution : +15%
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>⚠️ Risk Detection</h2>
+
+        <div class="ai-box">
+            Current Risk Level : {{ risk_level }}
+        </div>
+
+        <div class="ai-box">
+            Continue maintaining attendance above 80%
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🤖 AI Mentor</h2>
+
+        <input
+        type="text"
+        placeholder="Ask AI Mentor..."
+        >
+
+        <button>
+            Ask Mentor
+        </button>
+
+        <div class="ai-box">
+            AI suggestions will appear here.
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📈 What-If Simulator</h2>
+
+        <input
+        type="number"
+        placeholder="Attendance %"
+        >
+
+        <input
+        type="number"
+        placeholder="Assignment Score"
+        >
+
+        <button>
+            Predict Future GPA
+        </button>
+
+        <div class="ai-box">
+            Predicted GPA will appear here.
+        </div>
+    </div>
+
+</div>
+
+<div class="footer">
+    <a href="/" style="color:#38bdf8;">
+        <a href="/student-data">
+            <button>
+                Enter Academic Data
+            </button>
+        </a>
+        Register New Student
+    </a>
+</div>
+
+</body>
+</html>
