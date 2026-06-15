@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+students.db
+students_backup.db
+.env
+

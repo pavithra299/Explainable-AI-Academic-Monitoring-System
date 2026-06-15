@@ -1,32 +1,34 @@
 import joblib
 import pandas as pd
+model = joblib.load(
+    "models/exam_score_model.pkl"
+)
 
-model = joblib.load("models/exam_score_model.pkl")
 explainer = joblib.load(
     "models/shap_explainer.pkl"
 )
 
 
 FEATURE_ORDER = [
-    'Hours_Studied',
-    'Attendance',
-    'Parental_Involvement',
-    'Access_to_Resources',
-    'Extracurricular_Activities',
-    'Sleep_Hours',
-    'Previous_Scores',
-    'Motivation_Level',
-    'Internet_Access',
-    'Tutoring_Sessions',
-    'Family_Income',
-    'Teacher_Quality',
-    'Peer_Influence',
-    'Physical_Activity',
-    'Learning_Disabilities',
-    'Parental_Education_Level',
-    'Distance_from_Home',
-    'School_Type_Public',
-    'Gender_Male'
+    "Hours_Studied",
+    "Attendance",
+    "Parental_Involvement",
+    "Access_to_Resources",
+    "Extracurricular_Activities",
+    "Sleep_Hours",
+    "Previous_Scores",
+    "Motivation_Level",
+    "Internet_Access",
+    "Tutoring_Sessions",
+    "Family_Income",
+    "Teacher_Quality",
+    "Peer_Influence",
+    "Physical_Activity",
+    "Learning_Disabilities",
+    "Parental_Education_Level",
+    "Distance_from_Home",
+    "School_Type_Public",
+    "Gender_Male"
 ]
 ORDINAL_MAPPINGS = {
     "Parental_Involvement": {
@@ -54,9 +56,9 @@ ORDINAL_MAPPINGS = {
     },
 
     "Teacher_Quality": {
-        "Low": 1,
-        "Medium": 2,
-        "High": 3
+        "Low": 0,
+        "Medium": 1,
+        "High": 2
     },
 
     "Peer_Influence": {
@@ -72,9 +74,9 @@ ORDINAL_MAPPINGS = {
     },
 
     "Distance_from_Home": {
-        "Near": 1,
-        "Moderate": 2,
-        "Far": 3
+        "Near": 0,
+        "Moderate": 1,
+        "Far": 2
     }
 }
 BINARY_MAPPINGS = {
@@ -94,15 +96,22 @@ BINARY_MAPPINGS = {
     }
 }
 def encode_student_data(data):
+
     data = data.copy()
 
     # Ordinal Encoding
     for feature, mapping in ORDINAL_MAPPINGS.items():
-        data[feature] = mapping[data[feature]]
+
+        data[feature] = mapping[
+            data[feature]
+        ]
 
     # Binary Encoding
     for feature, mapping in BINARY_MAPPINGS.items():
-        data[feature] = mapping[data[feature]]
+
+        data[feature] = mapping[
+            data[feature]
+        ]
 
     # One-Hot Encoding
     data["School_Type_Public"] = (
@@ -154,23 +163,64 @@ def generate_shap_explanation(student_data):
         )
     )
 
-    contributions.sort(
-        key=lambda x: abs(x[1]),
+    positive = [
+        (feature, value)
+        for feature, value in contributions
+        if value > 0
+    ]
+
+    negative = [
+        (feature, value)
+        for feature, value in contributions
+        if value < 0
+    ]
+
+    positive.sort(
+        key=lambda x: x[1],
         reverse=True
+    )
+
+    negative.sort(
+        key=lambda x: x[1]
     )
 
     explanations = []
 
-    for feature, value in contributions[:4]:
+    explanations.append(
+        "🟢 Positive Contributors"
+    )
 
-        if value > 0:
+    if positive:
+
+        for feature, value in positive[:2]:
+
             explanations.append(
                 f"✓ {feature.replace('_', ' ')} improved the prediction."
             )
 
-        else:
+    else:
+
+        explanations.append(
+            "No major positive contributors identified."
+        )
+
+
+    explanations.append(
+        "🔴 Negative Contributors"
+    )
+
+    if negative:
+
+        for feature, value in negative[:2]:
+
             explanations.append(
                 f"✗ {feature.replace('_', ' ')} reduced the prediction."
             )
+
+    else:
+
+        explanations.append(
+            "No major negative contributors identified."
+        )
 
     return explanations

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prediction History</title>
+</head>
+
+<body>
+
+    <h1>📜 Prediction History</h1>
+
+    <table border="1" cellpadding="10">
+
+        <tr>
+            <th>Date</th>
+            <th>Predicted Score</th>
+            <th>Risk Level</th>
+        </tr>
+
+        {% for prediction in predictions %}
+
+        <tr>
+            <td>{{ prediction.prediction_date }}</td>
+            <td>{{ prediction.predicted_score }}</td>
+            <td>{{ prediction.risk_level }}</td>
+        </tr>
+
+        {% endfor %}
+
+    </table>
+
+    <br>
+
+    <a href="/dashboard">
+        Back to Dashboard
+    </a>
+
+</body>
+</html>

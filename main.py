@@ -1,4 +1,6 @@
+from datetime import date
 from fastapi import FastAPI, Request, Form
+from starlette.middleware.sessions import SessionMiddleware
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
@@ -7,9 +9,18 @@ from predictor import (
     generate_shap_explanation
 )
 from database import engine, SessionLocal
-from models import Base, Student, AcademicRecord
-
+from models import (
+    Base,
+    Student,
+    AcademicRecord,
+    PredictionHistory,
+    Admin
+)
 app = FastAPI()
+app.add_middleware(
+    SessionMiddleware,
+    secret_key="academic_monitoring_secret"
+)
 
 templates = Jinja2Templates(directory="templates")
 
@@ -17,39 +28,87 @@ Base.metadata.create_all(bind=engine)
 
 
 @app.get("/", response_class=HTMLResponse)
-def register_page(request: Request):
+def home_page(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="register.html"
     )
+@app.get("/student-register", response_class=HTMLResponse)
+def student_register_page(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="student_register.html"
+    )
 
 
-@app.get("/login", response_class=HTMLResponse)
+@app.get("/student-login", response_class=HTMLResponse)
 def login_page(request: Request):
     return templates.TemplateResponse(
         request=request,
-        name="login.html"
+        name="student_login.html"
     )
 
 
 @app.get("/dashboard", response_class=HTMLResponse)
 def dashboard_page(request: Request):
 
+    student_email = request.cookies.get(
+        "student_email"
+    )
+
+    db = SessionLocal()
+
+    latest_prediction = db.query(
+        PredictionHistory
+    ).filter(
+        PredictionHistory.student_email == student_email
+    ).order_by(
+        PredictionHistory.id.desc()
+    ).first()
+    total_predictions = db.query(
+        PredictionHistory
+    ).filter(
+        PredictionHistory.student_email == student_email
+    ).count()
+
+    db.close()
+
+    if latest_prediction:
+
+        predicted_score = (
+            latest_prediction.predicted_score
+        )
+
+        risk_level = (
+            latest_prediction.risk_level
+        )
+
+        prediction_date = (
+            latest_prediction.prediction_date
+        )
+
+    else:
+
+        predicted_score = 0
+
+        risk_level = "Not Available"
+
+        prediction_date = "No Predictions Yet"
     return templates.TemplateResponse(
         request=request,
         name="dashboard.html",
         context={
-            "attendance": 0,
-            "predicted_gpa": 0,
-            "health_score": 0,
-            "risk_level": "Not Available"
+            "predicted_score": predicted_score,
+            "risk_level": risk_level,
+            "prediction_date": prediction_date,
+            "total_predictions": total_predictions
         }
     )
 @app.get("/student-data", response_class=HTMLResponse)
 def student_data_page(request: Request):
-    return templates.TemplateResponse(
-        request=request,
-        name="student_data.html"
+    return RedirectResponse(
+        url="/dashboard",
+        status_code=303
     )
 @app.get("/student-data-ai", response_class=HTMLResponse)
 def student_data_ai_page(request: Request):
@@ -84,12 +143,12 @@ def register_student(
     db.close()
 
     return RedirectResponse(
-        url="/login",
+        url="/student-login",
         status_code=303
     )
 
 
-@app.post("/login")
+@app.post("/student-login")
 def login_student(
     email: str = Form(...),
     password: str = Form(...)
@@ -103,10 +162,18 @@ def login_student(
     db.close()
 
     if student and student.password == password:
-        return RedirectResponse(
+
+        response = RedirectResponse(
             url="/dashboard",
             status_code=303
         )
+
+        response.set_cookie(
+            key="student_email",
+            value=student.email
+        )
+
+        return response
 
     return {"message": "Invalid Email or Password"}
 @app.post("/save-data")
@@ -173,10 +240,10 @@ def save_data(
         request=request,
         name="dashboard.html",
         context={
-            "attendance": attendance,
-            "predicted_gpa": predicted_gpa,
-            "health_score": round(health_score, 2),
-            "risk_level": risk_level
+            "predicted_score": predicted_score,
+            "risk_level": risk_level,
+            "prediction_date": prediction_date,
+            "total_predictions": total_predictions
         }
     )
 @app.post("/predict-ai")
@@ -226,6 +293,8 @@ def predict_ai(
     }
 
     predicted_score = predict_exam_score(student_data)
+    
+
     shap_explanations = generate_shap_explanation(
         student_data
     )
@@ -246,6 +315,24 @@ def predict_ai(
         mentor_message = (
             "Immediate intervention is recommended. Increase study hours, improve attendance, and utilize tutoring support."
         )
+    student_email = request.cookies.get(
+        "student_email"
+    )
+
+    db = SessionLocal()
+
+    prediction = PredictionHistory(
+        student_email=student_email,
+        predicted_score=predicted_score,
+        risk_level=risk_level,
+        prediction_date=str(date.today())
+    )
+
+    db.add(prediction)
+
+    db.commit()
+
+    db.close()
  
     return templates.TemplateResponse(
         request=request,
@@ -257,3 +344,172 @@ def predict_ai(
             "shap_explanations": shap_explanations
         }
 )
+@app.get("/prediction-history", response_class=HTMLResponse)
+def prediction_history(
+    request: Request
+):
+    student_email = request.cookies.get(
+        "student_email"
+    )
+
+    db = SessionLocal()
+
+    predictions = db.query(
+        PredictionHistory
+    ).filter(
+        PredictionHistory.student_email == student_email
+    ).all()
+
+    db.close()
+
+    return templates.TemplateResponse(
+        request=request,
+        name="prediction_history.html",
+        context={
+            "predictions": predictions
+        }
+    )
+@app.get("/admin-dashboard", response_class=HTMLResponse)
+def admin_dashboard(request: Request):
+
+    db = SessionLocal()
+
+    total_predictions = db.query(
+        PredictionHistory
+    ).count()
+
+    predictions = db.query(
+        PredictionHistory
+    ).all()
+
+    if predictions:
+
+        average_score = round(
+            sum(
+                prediction.predicted_score
+                for prediction in predictions
+            ) / len(predictions),
+            2
+        )
+
+    else:
+
+        average_score = 0
+
+    high_risk = db.query(
+        PredictionHistory
+    ).filter(
+        PredictionHistory.risk_level == "HIGH"
+    ).count()
+    medium_risk = db.query(
+        PredictionHistory
+    ).filter(
+        PredictionHistory.risk_level == "MEDIUM"
+    ).count()
+
+    low_risk = db.query(
+        PredictionHistory
+    ).filter(
+        PredictionHistory.risk_level == "LOW"
+    ).count()
+
+    db.close()
+
+    return templates.TemplateResponse(
+        request=request,
+        name="admin_dashboard.html",
+        context={
+            "total_predictions": total_predictions,
+            "average_score": average_score,
+            "high_risk": high_risk,
+            "medium_risk": medium_risk,
+            "low_risk": low_risk
+        }
+    )
+@app.get("/admin-register", response_class=HTMLResponse)
+def admin_register_page(request: Request):
+
+    return templates.TemplateResponse(
+        request=request,
+        name="admin_register.html"
+    )
+
+
+@app.post("/admin-register")
+def admin_register(
+    name: str = Form(...),
+    email: str = Form(...),
+    password: str = Form(...),
+    access_code: str = Form(...)
+):
+
+    if access_code != "VIIT2026ADMIN":
+        return {
+            "message": "Invalid Admin Access Code"
+        }
+
+    db = SessionLocal()
+
+    existing_admin = db.query(
+        Admin
+    ).filter(
+        Admin.email == email
+    ).first()
+
+    if existing_admin:
+
+        db.close()
+
+        return {
+            "message": "Admin already exists"
+        }
+
+    admin = Admin(
+        name=name,
+        email=email,
+        password=password
+    )
+
+    db.add(admin)
+
+    db.commit()
+
+    db.close()
+
+    return RedirectResponse(
+        url="/admin-login",
+        status_code=303
+    )
+@app.get("/admin-login", response_class=HTMLResponse)
+def admin_login_page(request: Request):
+
+    return templates.TemplateResponse(
+        request=request,
+        name="admin_login.html"
+    )
+@app.post("/admin-login")
+def admin_login(
+    email: str = Form(...),
+    password: str = Form(...)
+):
+
+    db = SessionLocal()
+
+    admin = db.query(
+        Admin
+    ).filter(
+        Admin.email == email
+    ).first()
+
+    db.close()
+
+    if admin and admin.password == password:
+
+        return RedirectResponse(
+            url="/admin-dashboard",
+            status_code=303
+        )
+
+    return {
+        "message": "Invalid Admin Credentials"
+    }
