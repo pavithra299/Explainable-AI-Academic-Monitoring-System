@@ -344,6 +344,143 @@ def predict_ai(
             "shap_explanations": shap_explanations
         }
 )
+
+@app.post("/ask-mentor")
+def ask_mentor(
+    request: Request,
+    question: str = Form(...)
+):
+
+    student_email = request.cookies.get(
+        "student_email"
+    )
+
+    db = SessionLocal()
+
+    latest_prediction = db.query(
+        PredictionHistory
+    ).filter(
+        PredictionHistory.student_email == student_email
+    ).order_by(
+        PredictionHistory.id.desc()
+    ).first()
+
+    db.close()
+
+    if latest_prediction:
+
+        score = latest_prediction.predicted_score
+        risk = latest_prediction.risk_level
+
+    else:
+
+        score = 0
+        risk = "HIGH"
+
+    question = question.lower()
+
+    if "improve" in question:
+
+        if risk == "HIGH":
+
+            response = (
+                f"Your predicted score is {score}. "
+                "Focus on improving attendance, increasing study hours, "
+                "and attending tutoring sessions regularly."
+            )
+
+        elif risk == "MEDIUM":
+
+            response = (
+                f"Your predicted score is {score}. "
+                "You are performing reasonably well. "
+                "Maintain consistency and strengthen weak subjects."
+            )
+
+        else:
+
+            response = (
+                f"Excellent work! Your predicted score is {score}. "
+                "Continue your current study habits."
+            )
+
+    elif "attendance" in question:
+
+        response = (
+            "Maintain attendance above 80% to improve academic outcomes."
+        )
+
+    elif "study" in question:
+
+        response = (
+            "Aim for at least 10–15 focused study hours each week."
+        )
+
+    else:
+
+        response = (
+            "Try asking questions like: "
+            "'How can I improve?', "
+            "'How important is attendance?', "
+            "'How should I study effectively?'"
+        )
+
+    return {
+        "response": response
+    }
+
+@app.post("/predict-gpa")
+def predict_gpa(
+    attendance: float = Form(...),
+    internal_marks: float = Form(...)
+):
+
+    internal_percent = (
+        internal_marks / 30
+    ) * 100
+
+    health_score = (
+        attendance * 0.4 +
+        internal_percent * 0.6
+    )
+
+    predicted_gpa = round(
+        (health_score / 100) * 10,
+        2
+    )
+
+    if predicted_gpa >= 9:
+
+        suggestion = (
+            "Excellent performance. Maintain your consistency."
+        )
+
+    elif predicted_gpa >= 7:
+
+        suggestion = (
+            "Good progress. Improve internal marks slightly to achieve distinction."
+        )
+
+    elif predicted_gpa >= 5:
+
+        suggestion = (
+            "Increase attendance and focus more on internal assessments."
+        )
+
+    else:
+
+        suggestion = (
+            "Immediate intervention recommended. Meet faculty mentors and develop a structured study plan."
+        )
+
+    return {
+        "gpa": predicted_gpa,
+        "suggestion": suggestion
+    }
+
+
+
+
 @app.get("/prediction-history", response_class=HTMLResponse)
 def prediction_history(
     request: Request
